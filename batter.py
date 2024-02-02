@@ -10,8 +10,8 @@ from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 import requests
 
-certemplate = "temp.pdf"
-excelfile = "data.xlsx"
+certemplate = "batters.pdf"
+excelfile = "batter.xlsx"
 varname = "Name"
 varmatches = "Matches"
 varbaseprice = "Base Price"
@@ -19,46 +19,49 @@ varruns = "Runs"
 varaverage = "Average"
 varstrikerate = "Strike rate"
 varnationality = "Nationality"
-varimage = "Image" 
+varrole = "Role"  # Add the 'Role' column
+varimage = "Image"
 
-# print("> Enter the pixel dimensions for the text to be printed on the certificate:")
-horz_name = 25
-vert_name = 650
+# Provide default pixel dimensions for the text to be printed on the certificate
+horz_name = 175
+vert_name = 680
 
-# Define box dimensions here
+# Define default box dimensions
 box_width = 200
 box_height = 20
 
-horz_matches = 25
-vert_matches = 600
-horz_baseprice = 25
-vert_baseprice = 550
-horz_runs = 25
-vert_runs = 500
-horz_average = 25
-vert_average = 450
-horz_strikerate = 25
-vert_strikerate = 400
-horz_nationality = 25
-vert_nationality = 350
-horz_image = 300  # Adjust the horizontal position for the image
-vert_image = 300  # Adjust the vertical position for the image
+# Define default positions for each field
+positions_dict = {
+    varname: (horz_name, vert_name),
+    varmatches: (590, 530 ),
+    varbaseprice: (590, 690),
+    varruns: (590, 400),
+    varaverage: (590, 280),
+    varstrikerate: (590, 150),
+    varnationality: (200, 780),
+    varrole: (175, 575),
+}
+
+# Define default position for the image
+horz_image = 0
+vert_image = 10
 
 varfont = "Roboto-Bold.ttf"
 
 # Specify different font sizes for each text element
 fontsize_dict = {
-    varname: 16,
-    varmatches: 12,
-    varbaseprice: 14,
-    varruns: 12,
-    varaverage: 14,
-    varstrikerate: 12,
-    varnationality: 14,
+    varname: 84,
+    varmatches: 64,
+    varbaseprice: 64,
+    varruns: 64,
+    varaverage: 64,
+    varstrikerate: 64,
+    varnationality: 32,
+    varrole: 38,  # Set font size for 'Role'
 }
 
 # create the certificate directory
-os.makedirs("certificates", exist_ok=True)
+os.makedirs("batters", exist_ok=True)
 
 # register the necessary font
 pdfmetrics.registerFont(TTFont('myFont', varfont))
@@ -74,51 +77,49 @@ for index, row in data.iterrows():
     average = str(row[varaverage])
     strike_rate = str(row[varstrikerate])
     nationality = row[varnationality]
+    role = row[varrole]  # Retrieve 'Role' from the row data
 
-    #  column contains the image URL
+    # column contains the image URL
     image_url = row[varimage]
 
     # Download the image using requests
     image_data = requests.get(image_url).content
 
     packet = io.BytesIO()
-    can = canvas.Canvas(packet, pagesize=letter)
+    can = canvas.Canvas(packet, pagesize=(900,1000))
 
     # Draw the rectangular boxes for each field
-    can.rect(horz_name, vert_name, box_width, box_height)
-    can.rect(horz_matches, vert_matches, box_width, box_height)
-    can.rect(horz_baseprice, vert_baseprice, box_width, box_height)
-    can.rect(horz_runs, vert_runs, box_width, box_height)
-    can.rect(horz_average, vert_average, box_width, box_height)
-    can.rect(horz_strikerate, vert_strikerate, box_width, box_height)
-    can.rect(horz_nationality, vert_nationality, box_width, box_height)
+    # for var, (horz, vert) in positions_dict.items():
+    #     can.rect(horz, vert, box_width, box_height)
 
     # Set font and color for each field
     can.setFont("myFont", fontsize_dict[varname])  # Use the specified font size for 'Name'
     can.setFillColor(HexColor("#FAFBF9"))  # Set font color
+    # Increase the vertical spacing between the two lines for the name
+    line_spacing = 62
 
-    # Provide the text for each field
-    can.drawCentredString(horz_name + box_width / 2, vert_name + box_height / 2, "Name: " + name)
+    # Split the name into words
+    name_parts = name.split(maxsplit=1)
+
+    # Draw the first word on the first line
+    can.drawCentredString(horz_name + box_width / 2, vert_name - box_height / 2, name_parts[0])
+
+    # Draw the rest of the name on the next line with increased spacing
+    if len(name_parts) > 1:
+        can.drawCentredString(horz_name + box_width / 2, vert_name - box_height / 2 - line_spacing, name_parts[1])
+
+
 
     # Adjust font size and provide text for other fields
     for var, fontsize in fontsize_dict.items():
         if var != varname:
             can.setFont("myFont", fontsize)
-            # Define vert_dict here for other fields
-            vert_dict = {
-                varmatches: vert_matches,
-                varbaseprice: vert_baseprice,
-                varruns: vert_runs,
-                varaverage: vert_average,
-                varstrikerate: vert_strikerate,
-                varnationality: vert_nationality,
-            }
-            can.drawCentredString(horz_name + box_width / 2, vert_dict[var] + box_height / 2, f"{var}: {row[var]}")
+            can.drawCentredString(positions_dict[var][0] + box_width / 2, positions_dict[var][1] - box_height / 2,  str(row[var]))
 
     # Add image to the PDF
     if image_data:
         img = ImageReader(io.BytesIO(image_data))
-        can.drawImage(img, horz_image, vert_image, width=400, height=400, mask='auto')  # Use 'mask' for PNG images
+        can.drawImage(img, horz_image, vert_image, width=580, height=580, mask='auto')  # Use 'mask' for PNG images
 
     can.save()
     packet.seek(0)
@@ -131,7 +132,7 @@ for index, row in data.iterrows():
     page = existing_pdf.pages[0]
     page.merge_page(new_pdf.pages[0])
     output.add_page(page)
-    destination = "certificates" + os.sep + name + ".pdf"
+    destination = "batters" + os.sep + name + ".pdf"
     outputStream = open(destination, "wb")
     output.write(outputStream)
     outputStream.close()
