@@ -19,7 +19,7 @@ varruns = "Runs"
 varaverage = "Average"
 varstrikerate = "Strike rate"
 varnationality = "Nationality"
-varimage = "Image"  # Assuming the column name is 'Image'
+varimage = "Image" 
 
 # print("> Enter the pixel dimensions for the text to be printed on the certificate:")
 horz_name = 25
@@ -75,7 +75,7 @@ for index, row in data.iterrows():
     strike_rate = str(row[varstrikerate])
     nationality = row[varnationality]
 
-    # Assuming 'Image' column contains the image URL
+    #  column contains the image URL
     image_url = row[varimage]
 
     # Download the image using requests
