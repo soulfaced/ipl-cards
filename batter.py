@@ -10,7 +10,7 @@ from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 import requests
 
-certemplate = "batters.pdf"
+certemplate = "bat1.pdf"
 excelfile = "batter.xlsx"
 varname = "Name"
 varmatches = "Matches"
@@ -23,7 +23,7 @@ varrole = "Role"  # Add the 'Role' column
 varimage = "Image"
 
 # Provide default pixel dimensions for the text to be printed on the certificate
-horz_name = 175
+horz_name = 275
 vert_name = 680
 
 # Define default box dimensions
@@ -33,17 +33,17 @@ box_height = 20
 # Define default positions for each field
 positions_dict = {
     varname: (horz_name, vert_name),
-    varmatches: (590, 530 ),
-    varbaseprice: (590, 690),
-    varruns: (590, 400),
-    varaverage: (590, 280),
-    varstrikerate: (590, 150),
-    varnationality: (200, 780),
+    varmatches: (600, 540),
+    varbaseprice: (610, 700),
+    varruns: (600, 400),
+    varaverage: (600, 280),
+    varstrikerate: (600, 150),
+    varnationality: (5, 75),
     varrole: (175, 575),
 }
 
 # Define default position for the image
-horz_image = 0
+horz_image = 90
 vert_image = 10
 
 varfont = "Roboto-Bold.ttf"
@@ -82,11 +82,15 @@ for index, row in data.iterrows():
     # column contains the image URL
     image_url = row[varimage]
 
-    # Download the image using requests
-    image_data = requests.get(image_url).content
+    # Initialize image data as None
+    image_data = None
+
+    # If there's an image URL provided, download the image
+    if image_url:
+        image_data = requests.get(image_url).content
 
     packet = io.BytesIO()
-    can = canvas.Canvas(packet, pagesize=(900,1000))
+    can = canvas.Canvas(packet, pagesize=(900, 1000))
 
     # Draw the rectangular boxes for each field
     # for var, (horz, vert) in positions_dict.items():
@@ -108,15 +112,14 @@ for index, row in data.iterrows():
     if len(name_parts) > 1:
         can.drawCentredString(horz_name + box_width / 2, vert_name - box_height / 2 - line_spacing, name_parts[1])
 
-
-
     # Adjust font size and provide text for other fields
     for var, fontsize in fontsize_dict.items():
         if var != varname:
             can.setFont("myFont", fontsize)
-            can.drawCentredString(positions_dict[var][0] + box_width / 2, positions_dict[var][1] - box_height / 2,  str(row[var]))
+            can.drawCentredString(positions_dict[var][0] + box_width / 2, positions_dict[var][1] - box_height / 2,
+                                   str(row[var]))
 
-    # Add image to the PDF
+    # Add image to the PDF if available
     if image_data:
         img = ImageReader(io.BytesIO(image_data))
         can.drawImage(img, horz_image, vert_image, width=580, height=580, mask='auto')  # Use 'mask' for PNG images

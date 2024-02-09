@@ -10,7 +10,7 @@ from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 import requests
 
-certemplate = "temp.pdf"
+certemplate = "bowl1.pdf"
 excelfile = "data.xlsx"
 varname = "Name"
 varmatches = "Matches"
@@ -23,7 +23,7 @@ varrole = "Role"  # Add the 'Role' column
 varimage = "Image"
 
 # Provide default pixel dimensions for the text to be printed on the certificate
-horz_name = 175
+horz_name = 275
 vert_name = 680
 
 # Define default box dimensions
@@ -33,17 +33,17 @@ box_height = 20
 # Define default positions for each field
 positions_dict = {
     varname: (horz_name, vert_name),
-    varmatches: (590, 510 ),
-    varbaseprice: (590, 690),
-    varruns: (590, 370),
-    varaverage: (590, 240),
-    varstrikerate: (horz_name, vert_name - 250),
-    varnationality: (200, 780),
+    varmatches: (600, 510 ),
+    varbaseprice: (610, 700),
+    varruns: (600, 380),
+    varaverage: (600, 250),
+    varstrikerate: (600, 120),
+    varnationality: (5, 75),
     varrole: (175, 575),
 }
 
 # Define default position for the image
-horz_image = 0
+horz_image = 90
 vert_image = 10
 
 varfont = "Roboto-Bold.ttf"
@@ -55,7 +55,7 @@ fontsize_dict = {
     varbaseprice: 64,
     varruns: 64,
     varaverage: 64,
-    varstrikerate: 12,
+    varstrikerate: 64,
     varnationality: 32,
     varrole: 38,  # Set font size for 'Role'
 }
